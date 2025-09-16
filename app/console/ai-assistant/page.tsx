@@ -183,10 +183,10 @@ Could you provide more specific details about what you're trying to accomplish o
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2">AI Troubleshooting Assistant</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">AI Troubleshooting Assistant</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
           Get instant help with IT issues, system optimization, and technical guidance
         </p>
       </div>
@@ -209,7 +209,7 @@ Could you provide more specific details about what you're trying to accomplish o
       )}
 
       {/* Chat Messages */}
-      <Card className="h-96 flex flex-col">
+      <Card className="h-[400px] sm:h-96 flex flex-col">
         <CardHeader>
           <CardTitle className="flex items-center">
             <Bot className="h-5 w-5 mr-2" />
