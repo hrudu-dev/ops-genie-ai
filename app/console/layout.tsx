@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useTheme } from 'next-themes'
+import { Chatbot } from '@/components/chatbot'
 import {
   Shield,
   LayoutDashboard,
@@ -190,8 +191,10 @@ export default function ConsoleLayout({
                 <Moon className="h-4 w-4 text-muted-foreground" />
               </div>
               
-              {/* User menu buttons */}
+              {/* Chatbot and User menu buttons */}
               <div className="flex items-center space-x-1">
+                <Chatbot />
+                
                 <Button variant="ghost" size="icon" className="hidden sm:inline-flex">
                   <User className="h-5 w-5" />
                   <span className="sr-only">User profile</span>
