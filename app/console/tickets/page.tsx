@@ -1,253 +1,186 @@
 "use client"
 
 import { useState } from 'react'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Search, Filter, MoreHorizontal, Clock, User, AlertTriangle } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Plus, Edit, Save, X } from 'lucide-react'
+import { mockTickets } from '@/lib/mock-data'
 
-const tickets = [
-  {
-    id: 'TK-001',
-    title: 'Server downtime - Production environment',
-    description: 'Main production server is experiencing intermittent downtime affecting all users.',
-    priority: 'Critical',
-    status: 'In Progress',
-    assignee: 'John Doe',
-    reporter: 'Sarah Wilson',
-    created: '2024-01-15T10:30:00Z',
-    updated: '2024-01-15T14:20:00Z',
-    category: 'Infrastructure'
-  },
-  {
-    id: 'TK-002',
-    title: 'Email service intermittent issues',
-    description: 'Users reporting delayed email delivery and occasional connection timeouts.',
-    priority: 'High',
-    status: 'Open',
-    assignee: 'Jane Smith',
-    reporter: 'Mike Johnson',
-    created: '2024-01-15T08:15:00Z',
-    updated: '2024-01-15T12:45:00Z',
-    category: 'Email'
-  },
-  {
-    id: 'TK-003',
-    title: 'VPN connection problems for remote users',
-    description: 'Multiple remote users unable to establish VPN connections.',
-    priority: 'Medium',
-    status: 'Resolved',
-    assignee: 'Mike Johnson',
-    reporter: 'Lisa Chen',
-    created: '2024-01-14T16:20:00Z',
-    updated: '2024-01-15T09:30:00Z',
-    category: 'Network'
-  },
-  {
-    id: 'TK-004',
-    title: 'Software license renewal required',
-    description: 'Adobe Creative Suite licenses expiring next month, need renewal process.',
-    priority: 'Low',
-    status: 'Open',
-    assignee: 'Alex Brown',
-    reporter: 'Tom Davis',
-    created: '2024-01-14T11:00:00Z',
-    updated: '2024-01-14T11:00:00Z',
-    category: 'Software'
+type Ticket = typeof mockTickets[0]
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'critical': return 'bg-red-500'
+    case 'open': return 'bg-blue-500'
+    case 'in_progress': return 'bg-yellow-500'
+    case 'resolved': return 'bg-green-500'
+    default: return 'bg-gray-500'
   }
-]
+}
+
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'high': return 'bg-red-100 text-red-800'
+    case 'medium': return 'bg-yellow-100 text-yellow-800'
+    case 'low': return 'bg-green-100 text-green-800'
+    default: return 'bg-gray-100 text-gray-800'
+  }
+}
 
 export default function TicketsPage() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [tickets, setTickets] = useState(mockTickets)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<Partial<Ticket>>({})
+  const [showNewForm, setShowNewForm] = useState(false)
+  const [newTicket, setNewTicket] = useState({ title: '', description: '', priority: 'medium', status: 'open' })
 
-  const filteredTickets = tickets.filter(ticket => {
-    const matchesSearch = ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         ticket.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = selectedStatus === 'all' || ticket.status.toLowerCase() === selectedStatus.toLowerCase()
-    return matchesSearch && matchesStatus
-  })
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority.toLowerCase()) {
-      case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      case 'high': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-      case 'low': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-    }
+  const startEdit = (ticket: Ticket) => {
+    setEditingId(ticket.id)
+    setEditForm(ticket)
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'resolved': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'in progress': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-      case 'open': return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-    }
+  const saveEdit = () => {
+    setTickets(prev => prev.map(t => t.id === editingId ? { ...t, ...editForm } : t))
+    setEditingId(null)
+    setEditForm({})
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+  const cancelEdit = () => {
+    setEditingId(null)
+    setEditForm({})
+  }
+
+  const addTicket = () => {
+    const ticket = {
+      id: String(tickets.length + 1),
+      ...newTicket,
+      assigned_to: 'Unassigned',
+      created_by: 'Demo User',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+    setTickets(prev => [ticket, ...prev])
+    setNewTicket({ title: '', description: '', priority: 'medium', status: 'open' })
+    setShowNewForm(false)
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold">Ticket Triage</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Manage and prioritize support tickets efficiently
-          </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Ticket Triage</h1>
+          <p className="text-muted-foreground mt-2">Manage and prioritize support tickets</p>
         </div>
-        <Button className="w-full sm:w-auto">
-          <Plus className="h-4 w-4 mr-2" />
-          New Ticket
+        <Button onClick={() => setShowNewForm(true)}>
+          <Plus className="h-4 w-4 mr-2" />New Ticket
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Tickets</p>
-                <p className="text-2xl font-bold">{tickets.length}</p>
-              </div>
-              <AlertTriangle className="h-8 w-8 text-blue-600" />
+      {showNewForm && (
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Create New Ticket</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input id="title" value={newTicket.title} onChange={(e) => setNewTicket(prev => ({ ...prev, title: e.target.value }))} />
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Open</p>
-                <p className="text-2xl font-bold">{tickets.filter(t => t.status === 'Open').length}</p>
-              </div>
-              <Clock className="h-8 w-8 text-yellow-600" />
+            <div>
+              <Label htmlFor="priority">Priority</Label>
+              <Select value={newTicket.priority} onValueChange={(value) => setNewTicket(prev => ({ ...prev, priority: value }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
-                <p className="text-2xl font-bold">{tickets.filter(t => t.status === 'In Progress').length}</p>
-              </div>
-              <User className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Resolved</p>
-                <p className="text-2xl font-bold">{tickets.filter(t => t.status === 'Resolved').length}</p>
-              </div>
-              <div className="h-8 w-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                <div className="h-4 w-4 bg-green-600 rounded-full"></div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <CardTitle>All Tickets</CardTitle>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search tickets..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full sm:w-64"
-                />
-              </div>
-              <Button variant="outline" size="sm" className="w-full sm:w-auto">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
+            <div className="col-span-2">
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" value={newTicket.description} onChange={(e) => setNewTicket(prev => ({ ...prev, description: e.target.value }))} />
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={selectedStatus} onValueChange={setSelectedStatus}>
-            <TabsList>
-              <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="open">Open</TabsTrigger>
-              <TabsTrigger value="in progress">In Progress</TabsTrigger>
-              <TabsTrigger value="resolved">Resolved</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value={selectedStatus} className="mt-4">
+          <div className="flex gap-2 mt-4">
+            <Button onClick={addTicket}>Create</Button>
+            <Button variant="outline" onClick={() => setShowNewForm(false)}>Cancel</Button>
+          </div>
+        </Card>
+      )}
+
+      <div className="grid gap-4">
+        {tickets.map((ticket) => (
+          <Card key={ticket.id} className="p-6">
+            {editingId === ticket.id ? (
               <div className="space-y-4">
-                {filteredTickets.map((ticket) => (
-                  <div key={ticket.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="font-mono text-sm text-muted-foreground">{ticket.id}</span>
-                          <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(ticket.priority)}`}>
-                            {ticket.priority}
-                          </span>
-                          <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(ticket.status)}`}>
-                            {ticket.status}
-                          </span>
-                          <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-800 rounded-full">
-                            {ticket.category}
-                          </span>
-                        </div>
-                        
-                        <h3 className="font-semibold text-lg mb-2">{ticket.title}</h3>
-                        <p className="text-muted-foreground mb-3">{ticket.description}</p>
-                        
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                          <span>Assigned to: <span className="font-medium">{ticket.assignee}</span></span>
-                          <span>Reporter: <span className="font-medium">{ticket.reporter}</span></span>
-                          <span>Created: {formatDate(ticket.created)}</span>
-                          <span>Updated: {formatDate(ticket.updated)}</span>
-                        </div>
-                      </div>
-                      
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Title</Label>
+                    <Input value={editForm.title || ''} onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))} />
                   </div>
-                ))}
-                
-                {filteredTickets.length === 0 && (
-                  <div className="text-center py-8">
-                    <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No tickets found</h3>
-                    <p className="text-muted-foreground">
-                      {searchTerm ? 'Try adjusting your search terms' : 'No tickets match the selected filters'}
-                    </p>
+                  <div>
+                    <Label>Status</Label>
+                    <Select value={editForm.status} onValueChange={(value) => setEditForm(prev => ({ ...prev, status: value as any }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
+                  <div>
+                    <Label>Priority</Label>
+                    <Select value={editForm.priority} onValueChange={(value) => setEditForm(prev => ({ ...prev, priority: value as any }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Assigned To</Label>
+                    <Input value={editForm.assigned_to || ''} onChange={(e) => setEditForm(prev => ({ ...prev, assigned_to: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Input value={editForm.description || ''} onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))} />
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={saveEdit}><Save className="h-4 w-4 mr-2" />Save</Button>
+                  <Button variant="outline" onClick={cancelEdit}><X className="h-4 w-4 mr-2" />Cancel</Button>
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            ) : (
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3 mb-2">
+                    <span className="text-sm font-mono text-muted-foreground">#{ticket.id}</span>
+                    <div className={`w-2 h-2 rounded-full ${getStatusColor(ticket.status)}`} />
+                    <span className={`px-2 py-1 text-xs rounded-full ${getPriorityColor(ticket.priority)}`}>{ticket.priority}</span>
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">{ticket.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">{ticket.description}</p>
+                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                    <span>Assigned: {ticket.assigned_to}</span>
+                    <span>•</span>
+                    <span>By: {ticket.created_by}</span>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => startEdit(ticket)}>
+                  <Edit className="h-4 w-4 mr-2" />Edit
+                </Button>
+              </div>
+            )}
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
