@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generate, gemini15Flash } from '@/lib/genkit'
+import { generate, gemini25Flash } from '@/lib/genkit'
 import { saveChatMessage } from '@/lib/database'
 
 export async function POST(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     const response = await generate({
-      model: gemini15Flash,
+      model: gemini25Flash,
       prompt: `You are an AI assistant for OpsGenie AI, a console for MSPs and IT teams. Help with IT troubleshooting, system monitoring, and technical support. Keep responses concise and helpful.
 
 User: ${message}`,

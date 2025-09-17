@@ -1,5 +1,5 @@
 import { configureGenkit } from '@genkit-ai/core'
-import { googleAI, gemini15Flash } from '@genkit-ai/googleai'
+import { googleAI } from '@genkit-ai/googleai'
 import { generate } from '@genkit-ai/ai'
 
 export const ai = configureGenkit({
@@ -8,4 +8,5 @@ export const ai = configureGenkit({
   enableTracingAndMetrics: true,
 })
 
-export { generate, gemini15Flash }
+export { generate }
+export const gemini25Flash = 'googleai/gemini-2.5-flash'

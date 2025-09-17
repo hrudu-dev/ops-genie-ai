@@ -23,7 +23,7 @@ OpsGenie AI is a modern, AI-powered console designed for Managed Service Provide
 
 - **Frontend**: React 18, Next.js 14, TypeScript
 - **Backend**: Supabase (PostgreSQL, Authentication, Storage)
-- **AI**: Google Genkit, Gemini 1.5 Flash
+- **AI**: Google Genkit, Gemini 2.5 Flash
 - **Styling**: Tailwind CSS, shadcn/ui components
 - **Icons**: Lucide React
 - **Theme**: next-themes for dark/light mode
