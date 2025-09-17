@@ -15,7 +15,7 @@ We take the security of OpsGenie AI seriously. If you discover a security vulner
 ### How to Report
 
 1. **Do NOT** create a public GitHub issue for security vulnerabilities
-2. Send an email to: **security@opsgenie-ai.com** (replace with your actual security email)
+2. Create a private security advisory on GitHub or email: **hrudu.shibu@gmail.com**
 3. Include the following information:
    - Description of the vulnerability
    - Steps to reproduce the issue
@@ -33,72 +33,53 @@ We take the security of OpsGenie AI seriously. If you discover a security vulner
 
 When using OpsGenie AI, please follow these security best practices:
 
-#### Authentication & Authorization
-- Use strong, unique passwords for all accounts
-- Enable multi-factor authentication (MFA) when available
-- Regularly review and rotate API keys and access tokens
-- Implement proper role-based access control (RBAC)
+#### Environment Variables & API Keys
+- Never commit `.env.local` or files containing sensitive credentials to version control
+- Use strong, unique API keys for Google AI and Supabase
+- Regularly rotate API keys and access tokens
+- Use environment-specific configurations for development, staging, and production
 
-#### Data Protection
-- Use HTTPS/TLS for all communications
-- Encrypt sensitive data at rest and in transit
-- Regularly backup data and test recovery procedures
-- Implement proper data retention and deletion policies
+#### Database Security (Supabase)
+- Enable Row Level Security (RLS) policies (included in our schema)
+- Use the principle of least privilege for database access
+- Regularly audit user permissions and access logs
+- Keep your Supabase project and dependencies up to date
 
-#### Infrastructure Security
-- Keep all dependencies and packages up to date
-- Use environment variables for sensitive configuration
-- Implement proper network segmentation and firewalls
-- Regular security audits and vulnerability assessments
+#### AI API Security
+- Protect your Google AI API keys
+- Implement rate limiting on chat endpoints
+- Validate and sanitize all user inputs to AI models
+- Monitor AI API usage and costs
 
-#### Application Security
-- Validate and sanitize all user inputs
-- Implement proper error handling (avoid exposing sensitive information)
-- Use secure coding practices and conduct code reviews
-- Implement rate limiting and DDoS protection
+#### Infrastructure (AWS Amplify)
+- Use environment variables for all sensitive configuration
+- Enable HTTPS for all communications
+- Regularly update dependencies
+- Monitor application logs for security events
 
 ### Security Features
 
 OpsGenie AI includes the following security features:
 
-- **AI-Powered Password Strength Analysis**: Real-time password strength validation
-- **Secure Authentication Flow**: Protected login/signup processes
-- **Theme-based Security**: Dark/light mode doesn't expose sensitive data
+- **AI-Powered Password Strength Analysis**: Real-time password strength validation using Genkit
+- **Secure Database**: Supabase with Row Level Security policies
 - **Input Validation**: All user inputs are validated and sanitized
-- **Secure Headers**: Proper security headers implementation
-
-### Responsible Disclosure
-
-We believe in responsible disclosure and will work with security researchers to:
-
-- Understand and reproduce the vulnerability
-- Develop and test a fix
-- Coordinate the release of the fix
-- Publicly acknowledge your contribution (if desired)
-
-### Bug Bounty Program
-
-Currently, we do not have a formal bug bounty program, but we greatly appreciate security researchers who help us improve the security of OpsGenie AI. We will acknowledge your contributions and may provide recognition in our security hall of fame.
-
-### Security Updates
-
-Security updates will be:
-
-- Released as soon as possible after a fix is developed
-- Documented in our changelog with appropriate severity levels
-- Communicated through our official channels
-- Backward compatible when possible
+- **Secure API Endpoints**: Protected chat and database operations
+- **Environment Isolation**: Proper separation of development and production environments
 
 ### Contact Information
 
 For security-related inquiries:
-- **Email**: security@opsgenie-ai.com
-- **PGP Key**: [Link to PGP key if available]
+- **Email**: hrudu.shibu@gmail.com
+- **GitHub**: [@hrudu-dev](https://github.com/hrudu-dev)
 
 For general support:
 - **GitHub Issues**: For non-security related bugs and feature requests
-- **Documentation**: Check our README.md and documentation first
+- **Documentation**: Check our README.md first
 
 ---
+
+**Maintainers**: Hrudu Shibu & Ashwini N  
+**Last Updated**: January 2025
 
 Thank you for helping keep OpsGenie AI and our users safe!

@@ -5,24 +5,30 @@ OpsGenie AI is a modern, AI-powered console designed for Managed Service Provide
 ## Features
 
 - **Authentication**: Secure login, signup, and password reset functionality
-- **AI-Powered Password Strength**: Real-time feedback on password strength during signup, powered by Genkit and Google's Gemini models
-- **AI Troubleshooting Chatbot**: An integrated AI assistant to help users diagnose and solve IT issues
-- **Ticket Triage**: A central hub for managing and prioritizing support tickets
-- **Anomaly Detection**: Configure and monitor system metrics to proactively identify unusual patterns
+- **AI-Powered Chatbot**: Real-time AI assistant in the header using Genkit and Google's Gemini models
+- **AI-Powered Password Strength**: Real-time feedback on password strength during signup
+- **AI Troubleshooting Assistant**: Integrated AI assistant to help diagnose and solve IT issues
+- **Database Integration**: Supabase backend with PostgreSQL and real-time capabilities
+- **File Storage**: Secure file uploads and management with Supabase Storage
+- **Ticket Triage**: Central hub for managing and prioritizing support tickets
+- **Anomaly Detection**: Configure and monitor system metrics to identify unusual patterns
 - **SLA Monitoring**: Track and ensure compliance with Service Level Agreements
-- **Growth Dashboard**: Visualize key metrics like ticket resolution, user growth, and resolution rates with interactive charts
-- **User Management**: Easily manage users, roles, and permissions within your organization
-- **Extensions**: Integrate third-party tools and services to extend the console's functionality
-- **Profile & Settings**: Manage user profiles and customize application settings
-- **Theming**: Includes a dark and light mode toggle for user preference
+- **Growth Dashboard**: Visualize key metrics with interactive charts
+- **User Management**: Manage users, roles, and permissions
+- **Extensions**: Integrate third-party tools and services
+- **Profile & Settings**: Manage user profiles and customize settings
+- **Theming**: Dark and light mode toggle
 
 ## Tech Stack
 
 - **Frontend**: React 18, Next.js 14, TypeScript
+- **Backend**: Supabase (PostgreSQL, Authentication, Storage)
+- **AI**: Google Genkit, Gemini 1.5 Flash
 - **Styling**: Tailwind CSS, shadcn/ui components
 - **Icons**: Lucide React
 - **Theme**: next-themes for dark/light mode
 - **UI Components**: Radix UI primitives
+- **Deployment**: AWS Amplify
 
 ## Getting Started
 
@@ -35,8 +41,8 @@ OpsGenie AI is a modern, AI-powered console designed for Managed Service Provide
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd opsgenie-ai
+git clone https://github.com/hrudu-dev/ops-genie-ai.git
+cd ops-genie-ai
 ```
 
 2. Install dependencies:
@@ -44,12 +50,27 @@ cd opsgenie-ai
 npm install
 ```
 
-3. Run the development server:
+3. Set up environment variables:
+```bash
+cp .env.example .env.local
+```
+Add your API keys to `.env.local`:
+- `GOOGLE_AI_API_KEY`: Get from [Google AI Studio](https://ai.google.dev)
+- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anon key
+- `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
+
+4. Set up Supabase:
+- Create a new project at [supabase.com](https://supabase.com)
+- Run the SQL in `sql/schema.sql` in your Supabase SQL editor
+- Create storage buckets: `avatars` (public) and `attachments` (private)
+
+5. Run the development server:
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Project Structure
 
@@ -89,20 +110,26 @@ opsgenie-ai/
 
 ## Features in Detail
 
+### AI-Powered Chatbot
+Header-integrated AI assistant powered by Google Genkit and Gemini:
+- Real-time responses to IT support questions
+- Context-aware troubleshooting guidance
+- Modal interface with chat history
+- Persistent conversation storage
+
 ### AI-Powered Password Strength
-The signup process includes real-time password strength analysis that provides:
+The signup process includes real-time password strength analysis:
 - Strength scoring (1-5 scale)
 - Visual feedback with color-coded progress bars
 - Specific suggestions for improvement
 - Real-time validation as users type
 
-### AI Troubleshooting Assistant
-An intelligent chatbot that helps with:
-- Network connectivity issues
-- Security best practices
-- Performance optimization
-- Step-by-step troubleshooting guides
-- Quick action buttons for common problems
+### Database & Storage
+Supabase integration provides:
+- PostgreSQL database with Row Level Security
+- Real-time subscriptions
+- File storage with public/private buckets
+- User authentication and authorization
 
 ### Ticket Management
 Comprehensive ticket triage system featuring:
@@ -150,7 +177,9 @@ Built with Tailwind CSS and shadcn/ui components for consistent, accessible desi
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2025 Hrudu Shibu & Ashwini N
 
 ## Support
 
