@@ -7,9 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Edit, Save, X } from 'lucide-react'
-import { mockTickets } from '@/lib/mock-data'
-
-type Ticket = typeof mockTickets[0]
+import { mockTickets, type Ticket } from '@/lib/mock-data'
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -35,7 +33,7 @@ export default function TicketsPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Partial<Ticket>>({})
   const [showNewForm, setShowNewForm] = useState(false)
-  const [newTicket, setNewTicket] = useState({ title: '', description: '', priority: 'medium', status: 'open' })
+  const [newTicket, setNewTicket] = useState<{ title: string; description: string; priority: Ticket['priority']; status: Ticket['status'] }>({ title: '', description: '', priority: 'medium', status: 'open' })
 
   const startEdit = (ticket: Ticket) => {
     setEditingId(ticket.id)
@@ -54,7 +52,7 @@ export default function TicketsPage() {
   }
 
   const addTicket = () => {
-    const ticket = {
+    const ticket: Ticket = {
       id: String(tickets.length + 1),
       ...newTicket,
       assigned_to: 'Unassigned',
@@ -89,7 +87,7 @@ export default function TicketsPage() {
             </div>
             <div>
               <Label htmlFor="priority">Priority</Label>
-              <Select value={newTicket.priority} onValueChange={(value) => setNewTicket(prev => ({ ...prev, priority: value }))}>
+              <Select value={newTicket.priority} onValueChange={(value: Ticket['priority']) => setNewTicket(prev => ({ ...prev, priority: value }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="low">Low</SelectItem>

@@ -6,17 +6,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Plus, Edit, Save, X, User } from 'lucide-react'
-import { mockUsers } from '@/lib/mock-data'
-
-type User = typeof mockUsers[0]
+import { Plus, Edit, Save, X, User as UserIcon } from 'lucide-react'
+import { mockUsers, type User } from '@/lib/mock-data'
 
 export default function UsersPage() {
   const [users, setUsers] = useState(mockUsers)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<Partial<User>>({})
   const [showNewForm, setShowNewForm] = useState(false)
-  const [newUser, setNewUser] = useState({ name: '', email: '', role: 'user' })
+  const [newUser, setNewUser] = useState<{ name: string; email: string; role: User['role'] }>({ name: '', email: '', role: 'user' })
 
   const startEdit = (user: User) => {
     setEditingId(user.id)
@@ -35,7 +33,7 @@ export default function UsersPage() {
   }
 
   const addUser = () => {
-    const user = {
+    const user: User = {
       id: String(users.length + 1),
       ...newUser,
       created_at: new Date().toISOString()
@@ -80,7 +78,7 @@ export default function UsersPage() {
             </div>
             <div>
               <Label htmlFor="role">Role</Label>
-              <Select value={newUser.role} onValueChange={(value) => setNewUser(prev => ({ ...prev, role: value }))}>
+              <Select value={newUser.role} onValueChange={(value: User['role']) => setNewUser(prev => ({ ...prev, role: value }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="user">User</SelectItem>
@@ -132,7 +130,7 @@ export default function UsersPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                    <User className="h-6 w-6" />
+                    <UserIcon className="h-6 w-6" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">{user.name}</h3>
