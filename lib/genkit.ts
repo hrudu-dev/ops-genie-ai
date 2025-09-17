@@ -1,5 +1,6 @@
 import { configureGenkit } from '@genkit-ai/core'
-import { googleAI } from '@genkit-ai/googleai'
+import { googleAI, gemini15Flash } from '@genkit-ai/googleai'
+import { generate } from '@genkit-ai/ai'
 
 export const ai = configureGenkit({
   plugins: [googleAI()],
@@ -7,5 +8,4 @@ export const ai = configureGenkit({
   enableTracingAndMetrics: true,
 })
 
-export { generate } from '@genkit-ai/ai'
-export { gemini15Flash } from '@genkit-ai/googleai'
+export { generate, gemini15Flash }
