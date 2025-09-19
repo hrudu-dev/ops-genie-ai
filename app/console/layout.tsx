@@ -53,7 +53,7 @@ export default function ConsoleLayout({
     setMounted(true)
   }, [])
 
-  // Close sidebar when clicking outside on mobile
+  // Close sidebar on window resize for desktop breakpoint
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
@@ -63,7 +63,7 @@ export default function ConsoleLayout({
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [setSidebarOpen])
 
   const currentPage = navigation.find(item => item.href === pathname)
 

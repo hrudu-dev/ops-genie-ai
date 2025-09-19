@@ -4,8 +4,8 @@ import { generate } from '@genkit-ai/ai'
 
 export const ai = configureGenkit({
   plugins: [googleAI()],
-  logLevel: 'debug',
-  enableTracingAndMetrics: true,
+  logLevel: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  enableTracingAndMetrics: process.env.NODE_ENV !== 'production',
 })
 
 export { generate }

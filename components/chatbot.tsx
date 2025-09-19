@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input'
 import { MessageSquare, Send, X } from 'lucide-react'
 
 interface Message {
+  id: string
   role: 'user' | 'assistant'
   content: string
+  timestamp: number
 }
 
 export function Chatbot() {
@@ -19,7 +21,12 @@ export function Chatbot() {
   const sendMessage = async () => {
     if (!input.trim() || loading) return
 
-    const userMessage = { role: 'user' as const, content: input }
+    const userMessage: Message = { 
+      id: `user-${Date.now()}`, 
+      role: 'user', 
+      content: input,
+      timestamp: Date.now()
+    }
     setMessages(prev => [...prev, userMessage])
     setInput('')
     setLoading(true)
@@ -31,13 +38,29 @@ export function Chatbot() {
         body: JSON.stringify({ message: input }),
       })
 
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`)
+      }
+
       const data = await response.json()
       
       if (data.response) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.response }])
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: data.response,
+          timestamp: Date.now()
+        }
+        setMessages(prev => [...prev, assistantMessage])
       }
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }])
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
+        timestamp: Date.now()
+      }
+      setMessages(prev => [...prev, errorMessage])
     } finally {
       setLoading(false)
     }
@@ -69,8 +92,8 @@ export function Chatbot() {
               {messages.length === 0 && (
                 <p className="text-muted-foreground text-sm">Ask me anything about IT support!</p>
               )}
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              {messages.map((msg) => (
+                <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[80%] p-2 rounded-lg text-sm ${
                     msg.role === 'user' 
                       ? 'bg-primary text-primary-foreground' 
@@ -92,7 +115,7 @@ export function Chatbot() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type your message..."
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                 disabled={loading}
               />
               <Button onClick={sendMessage} disabled={loading || !input.trim()}>
