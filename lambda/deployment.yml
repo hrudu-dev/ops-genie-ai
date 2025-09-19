@@ -1,0 +1,198 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: OpsGenie AI Lambda Functions for Security and Monitoring
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [dev, staging, prod]
+  
+  AppUrl:
+    Type: String
+    Description: Application URL for health checks
+  
+  SupabaseUrl:
+    Type: String
+    Description: Supabase project URL
+  
+  SupabaseAnonKey:
+    Type: String
+    Description: Supabase anonymous key
+    NoEcho: true
+
+Resources:
+  # SNS Topics for Alerts
+  SecurityAlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'opsgenie-security-alerts-${Environment}'
+  
+  HealthAlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'opsgenie-health-alerts-${Environment}'
+  
+  PerformanceAlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub 'opsgenie-performance-alerts-${Environment}'
+  
+  # DynamoDB Tables
+  ScanResultsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'opsgenie-scan-results-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: scanId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: scanId
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+  
+  MetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'opsgenie-metrics-${Environment}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: timestamp
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+  
+  # IAM Role for Lambda Functions
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: OpsGenieLambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: 
+                  - !Ref SecurityAlertsTopic
+                  - !Ref HealthAlertsTopic
+                  - !Ref PerformanceAlertsTopic
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                Resource:
+                  - !GetAtt ScanResultsTable.Arn
+                  - !GetAtt MetricsTable.Arn
+              - Effect: Allow
+                Action:
+                  - cloudwatch:GetMetricStatistics
+                  - cloudwatch:PutMetricData
+                Resource: '*'
+  
+  # Lambda Functions
+  AuthMonitorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'opsgenie-auth-monitor-${Environment}'
+      CodeUri: security/
+      Handler: auth-monitor.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          SECURITY_ALERTS_TOPIC: !Ref SecurityAlertsTopic
+      Events:
+        AuthWebhook:
+          Type: Api
+          Properties:
+            Path: /auth-monitor
+            Method: post
+  
+  VulnerabilityScannerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'opsgenie-vulnerability-scanner-${Environment}'
+      CodeUri: security/
+      Handler: vulnerability-scanner.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 300
+      Environment:
+        Variables:
+          SECURITY_REPORTS_TOPIC: !Ref SecurityAlertsTopic
+          SCAN_RESULTS_TABLE: !Ref ScanResultsTable
+      Events:
+        ScheduledScan:
+          Type: Schedule
+          Properties:
+            Schedule: rate(24 hours)
+  
+  HealthCheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'opsgenie-health-check-${Environment}'
+      CodeUri: monitoring/
+      Handler: health-check.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          APP_URL: !Ref AppUrl
+          SUPABASE_URL: !Ref SupabaseUrl
+          SUPABASE_ANON_KEY: !Ref SupabaseAnonKey
+          HEALTH_ALERTS_TOPIC: !Ref HealthAlertsTopic
+      Events:
+        HealthCheckSchedule:
+          Type: Schedule
+          Properties:
+            Schedule: rate(5 minutes)
+  
+  PerformanceMonitorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub 'opsgenie-performance-monitor-${Environment}'
+      CodeUri: monitoring/
+      Handler: performance-monitor.handler
+      Runtime: nodejs18.x
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          PERFORMANCE_ALERTS_TOPIC: !Ref PerformanceAlertsTopic
+          METRICS_TABLE: !Ref MetricsTable
+      Events:
+        PerformanceCheck:
+          Type: Schedule
+          Properties:
+            Schedule: rate(5 minutes)
+
+Outputs:
+  AuthMonitorApi:
+    Description: API Gateway endpoint for auth monitoring
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/auth-monitor'
+  
+  SecurityAlertsTopic:
+    Description: SNS Topic for security alerts
+    Value: !Ref SecurityAlertsTopic
+  
+  HealthAlertsTopic:
+    Description: SNS Topic for health alerts
+    Value: !Ref HealthAlertsTopic
