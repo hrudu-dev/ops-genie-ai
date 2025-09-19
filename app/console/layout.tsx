@@ -35,6 +35,8 @@ const navigation = [
   { name: 'Growth Dashboard', href: '/console/growth', icon: TrendingUp },
   { name: 'User Management', href: '/console/users', icon: Users },
   { name: 'Extensions', href: '/console/extensions', icon: Puzzle },
+  { name: 'Profile', href: '/console/profile', icon: User },
+  { name: 'Settings', href: '/console/settings', icon: Settings },
 ]
 
 export default function ConsoleLayout({
